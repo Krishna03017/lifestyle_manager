@@ -135,17 +135,20 @@ elif menu == "Task Manager":
     
     if st.session_state.tasks:
         st.subheader("Your Tasks")
-        sorted_tasks = sorted(st.session_state.tasks, 
-                             key=lambda x: (x['due_date'], x['priority']))
+        sorted_tasks = sorted(
+            enumerate(st.session_state.tasks),
+            key=lambda item: (item[1]['due_date'], item[1]['priority'])
+        )
         
-        for i, task in enumerate(sorted_tasks):
+        for original_index, task in sorted_tasks:
             col1, col2, col3, col4 = st.columns([1, 3, 1, 1])
             
             with col1:
                 done = task['done']
-                if st.checkbox("", value=done, key=f"task_{i}"):
-                    st.session_state.tasks[i]['done'] = not done
+                if st.checkbox("", value=done, key=f"task_{original_index}"):
+                    st.session_state.tasks[original_index]['done'] = not done
                     save_data()
+                    st.experimental_rerun()
                     
             with col2:
                 due_date = datetime.strptime(task['due_date'], "%Y-%m-%d").date()
@@ -158,8 +161,8 @@ elif menu == "Task Manager":
                 st.write(f"Due: {task['due_date']}")
                 
             with col4:
-                if st.button("🗑️", key=f"del_task_{i}"):
-                    st.session_state.tasks.pop(i)
+                if st.button("🗑️", key=f"del_task_{original_index}"):
+                    st.session_state.tasks.pop(original_index)
                     save_data()
                     st.experimental_rerun()
     else:
@@ -298,4 +301,4 @@ elif menu == "AI Insights":
 
 # Footer
 st.sidebar.divider()
-st.sidebar.info("Your data is saved locally in your browser. It's never uploaded anywhere.")
+st.sidebar.info("Your data is saved locally on this deployment instance. It's never uploaded outside the app.")
